@@ -1,0 +1,9 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="pb_height_positive">60dp</dimen>
+    <dimen name="pb_height_negative">-60dp</dimen>
+    <dimen name="threshold_show_enable">80dp</dimen>
+    <dimen name="threshold_refresh">150dp</dimen>
+</resources>
