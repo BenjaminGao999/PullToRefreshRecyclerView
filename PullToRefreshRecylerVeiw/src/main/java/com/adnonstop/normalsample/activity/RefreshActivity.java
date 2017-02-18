@@ -40,6 +40,15 @@ public class RefreshActivity extends AppCompatActivity {
         initListener();
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                downRawY = ev.getRawY();
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
 
     private void initView() {
         mMyRL = (MyRelativeLayout) findViewById(R.id.id_container_myrl);

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.adnonstop.normalsample.R;
+import com.adnonstop.normalsample.util.SingleToast;
 
 import java.util.List;
 
@@ -35,10 +36,16 @@ public class SimpleRVAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof NormalViewHolder) {
             NormalViewHolder normalViewHolder = (NormalViewHolder) holder;
             normalViewHolder.tvItem.setText(mData.get(position));
+            normalViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SingleToast.singleToast(mContext, mData.get(position));
+                }
+            });
         }
     }
 
