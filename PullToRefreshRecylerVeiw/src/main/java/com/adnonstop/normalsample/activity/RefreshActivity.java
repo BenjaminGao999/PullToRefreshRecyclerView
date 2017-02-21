@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 
 import com.adnonstop.normalsample.R;
 import com.adnonstop.normalsample.adapter.SimpleRVAdapter;
-import com.adnonstop.normalsample.view.MyRelativeLayout;
+import com.adnonstop.normalsample.view.PTRRelativeLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class RefreshActivity extends AppCompatActivity {
     private RelativeLayout.LayoutParams mRVLayoutParams;
     private String newStateDesc;
     private int mNewState;
-    private MyRelativeLayout mMyRL;
+    private PTRRelativeLayout mMyRL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class RefreshActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        mMyRL = (MyRelativeLayout) findViewById(R.id.id_container_myrl);
+        mMyRL = (PTRRelativeLayout) findViewById(R.id.id_container_myrl);
         mRV = (RecyclerView) findViewById(R.id.id_rv_refresh);
         mLLManager = new LinearLayoutManager(this);
         mRV.setLayoutManager(mLLManager);

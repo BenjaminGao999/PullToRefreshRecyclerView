@@ -20,7 +20,7 @@ import com.adnonstop.normalsample.R;
  * DATE :  2017/2/18 10:26
  */
 
-public class MyRelativeLayout extends RelativeLayout {
+public class PTRRelativeLayout extends RelativeLayout {
 
     private static final String TAG = "MyRelativeLayout";
     private RecyclerView mRV;
@@ -31,18 +31,18 @@ public class MyRelativeLayout extends RelativeLayout {
     private RelativeLayout.LayoutParams mRVLayoutParams;
     private Object dataFromNet;
 
-    public MyRelativeLayout(Context context) {
+    public PTRRelativeLayout(Context context) {
         super(context);
         initChild();
     }
 
 
-    public MyRelativeLayout(Context context, AttributeSet attrs) {
+    public PTRRelativeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         initChild();
     }
 
-    public MyRelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PTRRelativeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initChild();
     }

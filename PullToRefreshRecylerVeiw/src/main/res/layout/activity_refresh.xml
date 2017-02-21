@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.adnonstop.normalsample.view.MyRelativeLayout
+    <com.adnonstop.normalsample.view.PTRRelativeLayout
         android:id="@+id/id_container_myrl"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -27,7 +27,7 @@
             android:layout_height="match_parent">
 
         </android.support.v7.widget.RecyclerView>
-    </com.adnonstop.normalsample.view.MyRelativeLayout>
+    </com.adnonstop.normalsample.view.PTRRelativeLayout>
 
 
 </LinearLayout>

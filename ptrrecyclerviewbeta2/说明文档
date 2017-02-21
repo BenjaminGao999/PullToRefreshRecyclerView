@@ -1,0 +1,192 @@
+一 前言
+目前利用recyclerView实现下拉刷新和上拉加载更多有2种方案：
+plan1: recyclerView+swipeRefreshLayout
+plan2: 仅仅采用RecyclerView
+
+二 plan2实现
+
+ ① 布局 ： 结合自定义的RelativeLayout实现
+ <com.adnonstop.ptrrecyclerviewbeta2.view.PTRRelativeLayout
+         android:id="@+id/id_ptrrl"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent">
+
+         <FrameLayout
+             android:id="@+id/id_fl_refresh"
+             android:layout_width="match_parent"
+             android:layout_height="60dp">
+
+             <ProgressBar
+                 android:layout_width="37dp"
+                 android:layout_height="37dp"
+                 android:layout_gravity="center" />
+
+         </FrameLayout>
+
+         <android.support.v7.widget.RecyclerView
+             android:id="@+id/id_rv"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
+
+         </android.support.v7.widget.RecyclerView>
+
+     </com.adnonstop.ptrrecyclerviewbeta2.view.PTRRelativeLayout>
+
+  ② 何时触发刷新操作？
+    mRecyclerView.setOnTouchListener(new View.OnTouchListener() {
+              @Override
+              public boolean onTouch(View v, MotionEvent event) {
+                  switch (event.getAction()) {
+                      case MotionEvent.ACTION_DOWN:
+                          mDownRawY = event.getRawY();
+                          L.i(TAG, "onClick: mDownRawY = " + mDownRawY);
+
+                          break;
+                      case MotionEvent.ACTION_MOVE:
+                          moveRawY = event.getRawY();
+  //                        Log.i(TAG, "onClick: moveRawY = " + moveRawY);
+                          disY = moveRawY - mDownRawY;
+                          L.i(TAG, "onClick: disY = " + disY);
+
+                          if (mLLManager == null) {
+                              mLLManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+                          }
+
+                          //触发刷新操作的条件
+                          if (mLLManager.findFirstVisibleItemPosition() == 0 && mNewState == RecyclerView.SCROLL_STATE_DRAGGING && disY > mContext.getResources().getDimension(R.dimen.threshold_show_enable)) {
+                              L.i(TAG, "onClick: start show progressbar");
+                              setTopMargin(1);
+                              mptrRelativeLayout.setInitDownRawY(moveRawY);
+                          }
+
+                          break;
+                      case MotionEvent.ACTION_UP:
+                          L.i(TAG, "RecyclerView.setOnTouchListener UP ");
+                          setTopMargin(0);
+                          break;
+                      default:
+                          break;
+                  }
+                  return false;
+              }
+          });
+
+
+    ③ 怎么解决滑动冲突事件？
+    PTRRelativeLayout：
+     @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            if (mRV != null) {
+                LayoutParams mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
+                int topMargin = mRVLayoutParams.topMargin;
+                /**
+                 *拦截touch事件
+                 * recyclerView 的 touch事件 被阻拦
+                 */
+                if (topMargin > 0) {
+                    return true;
+                }
+            }
+            return super.onInterceptTouchEvent(ev);
+        }
+
+   ④ 怎么解决recyclerView的item添加点击事件之后，拦截了recyclerView的touch down事件？
+      PTRActivity:
+       @Override
+          public boolean dispatchTouchEvent(MotionEvent ev) {
+              switch (ev.getAction()) {
+                  case MotionEvent.ACTION_DOWN:
+                      mDownRawY = ev.getRawY();
+                      L.i(TAG, "mDownRawY = " + mDownRawY);
+                      if (mptrAdapter != null) {
+                          mptrAdapter.setDowmRawY(mDownRawY);
+                      }
+                      break;
+                  default:
+                      break;
+              }
+              return super.dispatchTouchEvent(ev);
+          }
+
+   ⑤ 怎么调用联网获取数据的代码？
+        PTRRelativeLayout：
+
+          public void setActivity(AppCompatActivity activity) {
+                mActivity = activity;
+            }
+
+    /**
+     * 联网获取数据
+     */
+    public void getDataFromNet() {
+        if (mActivity != null) {
+            if (mActivity instanceof PTRActivity) {
+                PTRActivity mActivity = (PTRActivity) this.mActivity;
+                mActivity.initData(false);
+            }
+            /**
+             * 根据需要可以添加更多的if
+             */
+        }
+    }
+
+
+   ⑥ 怎么实现刷新头的显示和隐藏？
+    PTRRelativeLayout：
+     @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    downRawY = event.getRawY();
+                    L.i(TAG, "onClick: downRawY = " + downRawY);
+
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    moveRawY = event.getRawY();
+                    L.i(TAG, "onClick: moveRawY = " + moveRawY);
+                    disY = moveRawY - downRawY;
+                    L.i(TAG, "onClick: disY = " + disY);
+
+                    if (mLLManager.findFirstVisibleItemPosition() == 0) {
+                        if (disY < 0) {
+                            setTopMargin(0);
+                        } else {
+                            setTopMargin((int) disY);
+                        }
+                    }
+
+                    break;
+                case MotionEvent.ACTION_UP:
+                    /**
+                     * ① 不刷新，弹回去
+                     * ② 刷新，回弹到topMargin = progress_layout.height并联网获取数据，得到响应后弹回去
+                     */
+                    if (disY < getResources().getDimension(R.dimen.prt_threshold_refresh)) {
+                        setTopMargin(0);
+                    } else {
+                        setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height));
+                        getDataFromNet();
+                    }
+                    L.i(TAG, "com.adnonstop.missionhall.views.PTRRelativeLayout UP  mRVLayoutParams.topMargin = " + mRVLayoutParams.topMargin);
+
+                    break;
+                default:
+                    break;
+            }
+
+            return true;
+        }
+
+
+        public void setTopMargin(int topMargin) {
+            if (mRV == null)
+                return;
+            if (mRVLayoutParams == null) {
+                mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
+            }
+            mRVLayoutParams.topMargin = topMargin;
+            mRV.setLayoutParams(mRVLayoutParams);
+        }
+
+
+
