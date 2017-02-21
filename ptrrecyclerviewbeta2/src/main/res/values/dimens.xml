@@ -1,0 +1,10 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="prt_threshold_refresh">100dp</dimen>
+    <dimen name="ptr_pb_height">60dp</dimen>
+    <dimen name="threshold_show_enable">60dp</dimen>
+    <dimen name="footerview">60dp</dimen>
+    <dimen name="empty_item_deco">1dp</dimen>
+</resources>
