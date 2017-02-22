@@ -1,5 +1,7 @@
 package com.adnonstop.ptrrecyclerviewbeta2.view;
 
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,6 +35,7 @@ public class PTRRelativeLayout extends RelativeLayout {
     private AppCompatActivity mActivity;
     private FrameLayout mflpb;
     private LayoutParams mflpbLayoutParams;
+    private ValueAnimator mAnimation;
 
     public PTRRelativeLayout(Context context) {
         super(context);
@@ -97,9 +100,9 @@ public class PTRRelativeLayout extends RelativeLayout {
 
                 if (mLLManager.findFirstVisibleItemPosition() == 0) {
                     if (disY < 0) {
-                        setTopMargin(0);
+                        setTopMargin(0, true);
                     } else {
-                        setTopMargin((int) disY);
+                        setTopMargin((int) disY, true);
                     }
                 }
 
@@ -110,9 +113,9 @@ public class PTRRelativeLayout extends RelativeLayout {
                  * ② 刷新，回弹到topMargin = progress_layout.height并联网获取数据，得到响应后弹回去
                  */
                 if (disY < getResources().getDimension(R.dimen.prt_threshold_refresh)) {
-                    setTopMargin(0);
+                    setTopMargin(0, false);
                 } else {
-                    setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height));
+                    setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height), false);
                     getDataFromNet();
                 }
                 L.i(TAG, "com.adnonstop.missionhall.views.PTRRelativeLayout UP  mRVLayoutParams.topMargin = " + mRVLayoutParams.topMargin);
@@ -125,10 +128,44 @@ public class PTRRelativeLayout extends RelativeLayout {
         return true;
     }
 
-
-    public void setTopMargin(int topMargin) {
+    /**
+     * @param topMargin
+     * @param isDrag    手指拖拽是为true；否则为false。
+     */
+    public void setTopMargin(final int topMargin, boolean isDrag) {
         if (mRV == null)
             return;
+
+        if (!isDrag) {
+            if (mRVLayoutParams == null) {
+                mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
+            }
+            final int rvMagin = mRVLayoutParams.topMargin;
+
+            if (mAnimation == null) {
+                mAnimation = ValueAnimator.ofFloat(0f, 1f);
+            }
+            mAnimation.setDuration(300);
+            mAnimation.start();
+            mAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    L.i(TAG, "fraction = " + animation.getAnimatedFraction());
+                    Float evaluate = evaluate(animation.getAnimatedFraction(), rvMagin, topMargin);
+                    float floatValue = evaluate.floatValue();
+                    doMove((int) floatValue);
+                }
+            });
+        } else {
+            doMove(topMargin);
+        }
+
+
+    }
+
+
+    private void doMove(int topMargin) {
+
         if (mRVLayoutParams == null) {
             mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
         }
@@ -140,7 +177,11 @@ public class PTRRelativeLayout extends RelativeLayout {
         }
         mflpbLayoutParams.topMargin = (int) (getResources().getDimension(R.dimen.ptr_pb_height_negative) + topMargin);
         mflpb.setLayoutParams(mflpbLayoutParams);
+    }
 
+    public Float evaluate(float fraction, Number startValue, Number endValue) {
+        float startFloat = startValue.floatValue();
+        return startFloat + fraction * (endValue.floatValue() - startFloat);
     }
 
     /**

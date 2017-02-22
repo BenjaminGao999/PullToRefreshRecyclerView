@@ -79,7 +79,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
         }
 
         if (isFirstRefersh) {
-            ptrRl.setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height));
+            ptrRl.setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height), true);
         }
 
         //把footerView和currentPage设置为初始状态。
@@ -91,7 +91,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
             @Override
             public void onSuccess(ArrayList<String> newdatas) {
 
-                ptrRl.setTopMargin(0);//完成刷新
+                ptrRl.setTopMargin(0,false);//完成刷新
 
                 isRefresh = false;//完成刷新
 
@@ -118,7 +118,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
             public void onFail(String msg) {
                 //在已经有数据的情况下，刷新数据，突然断网，需要先清空数据
                 mptrAdapter.clearData();
-                ptrRl.setTopMargin(0);//完成刷新
+                ptrRl.setTopMargin(0,false);//完成刷新
                 isRefresh = false;//完成刷新
 
                 SingleToast.singleToast(PTRActivity.this, msg);
