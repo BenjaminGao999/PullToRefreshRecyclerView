@@ -7,4 +7,5 @@
     <dimen name="threshold_show_enable">60dp</dimen>
     <dimen name="footerview">60dp</dimen>
     <dimen name="empty_item_deco">1dp</dimen>
+    <dimen name="ptr_pb_height_negative">-60dp</dimen>
 </resources>

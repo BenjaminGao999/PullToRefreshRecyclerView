@@ -9,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -30,6 +31,8 @@ public class PTRRelativeLayout extends RelativeLayout {
     private LinearLayoutManager mLLManager;
     private LayoutParams mRVLayoutParams;
     private AppCompatActivity mActivity;
+    private FrameLayout mflpb;
+    private LayoutParams mflpbLayoutParams;
 
     public PTRRelativeLayout(Context context) {
         super(context);
@@ -52,7 +55,7 @@ public class PTRRelativeLayout extends RelativeLayout {
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-
+                mflpb = (FrameLayout) getChildAt(0);
                 mRV = (RecyclerView) getChildAt(1);
 
                 mLLManager = (LinearLayoutManager) mRV.getLayoutManager();
@@ -131,6 +134,13 @@ public class PTRRelativeLayout extends RelativeLayout {
         }
         mRVLayoutParams.topMargin = topMargin;
         mRV.setLayoutParams(mRVLayoutParams);
+
+        if (mflpbLayoutParams == null) {
+            mflpbLayoutParams = (LayoutParams) mflpb.getLayoutParams();
+        }
+        mflpbLayoutParams.topMargin = (int) (getResources().getDimension(R.dimen.ptr_pb_height_negative) + topMargin);
+        mflpb.setLayoutParams(mflpbLayoutParams);
+
     }
 
     /**
