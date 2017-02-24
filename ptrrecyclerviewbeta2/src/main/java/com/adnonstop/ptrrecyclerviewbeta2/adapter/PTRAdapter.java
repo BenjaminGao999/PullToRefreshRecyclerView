@@ -201,7 +201,8 @@ public class PTRAdapter extends RecyclerView.Adapter {
                     case MotionEvent.ACTION_MOVE:
                         moveRawY = event.getRawY();
 //                        Log.i(TAG, "onClick: moveRawY = " + moveRawY);
-                        disY = moveRawY - mDownRawY;
+                        Log.i(TAG, "onTouch: mDownRawY = " + mDownRawY);
+                        disY = moveRawY - mptrRelativeLayout.getmDownRawY();
                         L.i(TAG, "onClick: disY = " + disY);
 
                         if (mLLManager == null) {
@@ -331,6 +332,10 @@ public class PTRAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    /**
+     * @param downRawY
+     * @deprecated 获取touch down 事件 的监听，转由 ptrRelativeLayout内部实现
+     */
     public void setDowmRawY(float downRawY) {
         mDownRawY = downRawY;
     }

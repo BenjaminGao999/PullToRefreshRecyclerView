@@ -1,6 +1,5 @@
 package com.adnonstop.ptrrecyclerviewbeta2.view;
 
-import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
@@ -8,11 +7,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
@@ -36,6 +32,11 @@ public class PTRRelativeLayout extends RelativeLayout {
     private FrameLayout mflpb;
     private LayoutParams mflpbLayoutParams;
     private ValueAnimator mAnimation;
+    private float mDownRawY;//监听touch down 事件
+    private float mDamping;//阻尼系数
+    private int mNewTopMargin;
+    private int mPreTopMargin;
+    private int mTotalTopMargin;//top margin 的叠加
 
     public PTRRelativeLayout(Context context) {
         super(context);
@@ -67,6 +68,20 @@ public class PTRRelativeLayout extends RelativeLayout {
             }
         });
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mDownRawY = ev.getRawY();
+                L.i(TAG, PTRRelativeLayout.TAG + "downRawY = " + mDownRawY);
+                break;
+            default:
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
@@ -111,15 +126,18 @@ public class PTRRelativeLayout extends RelativeLayout {
                 /**
                  * ① 不刷新，弹回去
                  * ② 刷新，回弹到topMargin = progress_layout.height并联网获取数据，得到响应后弹回去
+                 * ③ mpreTopMargin 必须置0
+                 * ④ mTotalMargin 必须置0
                  */
+                mPreTopMargin = 0;//置0
+                mTotalTopMargin = 0;//置0
+                L.i(TAG, "mPreTopMargin = 0;//置0 ");
                 if (disY < getResources().getDimension(R.dimen.prt_threshold_refresh)) {
                     setTopMargin(0, false);
                 } else {
                     setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height), false);
                     getDataFromNet();
                 }
-                L.i(TAG, "com.adnonstop.missionhall.views.PTRRelativeLayout UP  mRVLayoutParams.topMargin = " + mRVLayoutParams.topMargin);
-
                 break;
             default:
                 break;
@@ -132,7 +150,7 @@ public class PTRRelativeLayout extends RelativeLayout {
      * @param topMargin
      * @param isDrag    手指拖拽是为true；否则为false。
      */
-    public void setTopMargin(final int topMargin, boolean isDrag) {
+    public void setTopMargin(final int topMargin, final boolean isDrag) {
         if (mRV == null)
             return;
 
@@ -150,33 +168,63 @@ public class PTRRelativeLayout extends RelativeLayout {
             mAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    L.i(TAG, "fraction = " + animation.getAnimatedFraction());
+//                    L.i(TAG, "fraction = " + animation.getAnimatedFraction());
                     Float evaluate = evaluate(animation.getAnimatedFraction(), rvMagin, topMargin);
                     float floatValue = evaluate.floatValue();
-                    doMove((int) floatValue);
+                    doMove((int) floatValue, isDrag);
                 }
             });
         } else {
-            doMove(topMargin);
+            doMove(topMargin, isDrag);
         }
 
 
     }
 
 
-    private void doMove(int topMargin) {
+    private void doMove(int topMargin, boolean isDrag) {
+        if (!isDrag) {
 
-        if (mRVLayoutParams == null) {
-            mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
-        }
-        mRVLayoutParams.topMargin = topMargin;
-        mRV.setLayoutParams(mRVLayoutParams);
+            if (mRVLayoutParams == null) {
+                mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
+            }
+            mRVLayoutParams.topMargin = topMargin;
+            mRV.setLayoutParams(mRVLayoutParams);
 
-        if (mflpbLayoutParams == null) {
-            mflpbLayoutParams = (LayoutParams) mflpb.getLayoutParams();
+            if (mflpbLayoutParams == null) {
+                mflpbLayoutParams = (LayoutParams) mflpb.getLayoutParams();
+            }
+            mflpbLayoutParams.topMargin = (int) (getResources().getDimension(R.dimen.ptr_pb_height_negative) + topMargin);
+            mflpb.setLayoutParams(mflpbLayoutParams);
+        } else {
+
+            mDamping = 1.0f;
+
+            if (topMargin > getResources().getDisplayMetrics().heightPixels / 4) {
+                mDamping = 2.0f;
+            }
+
+            mNewTopMargin = topMargin;
+
+            mTotalTopMargin += (mNewTopMargin - mPreTopMargin) / mDamping;
+
+            mPreTopMargin = mNewTopMargin;
+
+            if (mRVLayoutParams == null) {
+                mRVLayoutParams = (LayoutParams) mRV.getLayoutParams();
+            }
+
+
+            mRVLayoutParams.topMargin = mTotalTopMargin;
+            mRV.setLayoutParams(mRVLayoutParams);
+
+            if (mflpbLayoutParams == null) {
+                mflpbLayoutParams = (LayoutParams) mflpb.getLayoutParams();
+            }
+            mflpbLayoutParams.topMargin = (int) (getResources().getDimension(R.dimen.ptr_pb_height_negative) + mTotalTopMargin);
+            mflpb.setLayoutParams(mflpbLayoutParams);
         }
-        mflpbLayoutParams.topMargin = (int) (getResources().getDimension(R.dimen.ptr_pb_height_negative) + topMargin);
-        mflpb.setLayoutParams(mflpbLayoutParams);
+
     }
 
     public Float evaluate(float fraction, Number startValue, Number endValue) {
@@ -197,7 +245,6 @@ public class PTRRelativeLayout extends RelativeLayout {
              * 根据需要可以添加更多的if
              */
         }
-
     }
 
     /**
@@ -214,5 +261,10 @@ public class PTRRelativeLayout extends RelativeLayout {
         mActivity = activity;
     }
 
-
+    /**
+     * @return ptrRelativeLayout touch down rawY
+     */
+    public float getmDownRawY() {
+        return mDownRawY;
+    }
 }
