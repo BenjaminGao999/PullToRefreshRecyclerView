@@ -267,4 +267,15 @@ public class PTRRelativeLayout extends RelativeLayout {
     public float getmDownRawY() {
         return mDownRawY;
     }
+
+    /**
+     * @param refreshState true：正在刷新
+     */
+    public void setRefreshState(boolean refreshState) {
+        if (refreshState) {
+            setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height), true);
+        } else {
+            setTopMargin(0, false);
+        }
+    }
 }

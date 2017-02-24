@@ -1,6 +1,5 @@
 package com.adnonstop.ptrrecyclerviewbeta2.adapter;
 
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
-import com.adnonstop.ptrrecyclerviewbeta2.activity.PTRActivity;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.ItemClickListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.LoadMoreListener;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
@@ -34,7 +32,8 @@ public class PTRAdapter extends RecyclerView.Adapter {
     private final AppCompatActivity mContext;
     private final PTRRelativeLayout mptrRelativeLayout;
     private LoadMoreListener mLoadMoreListener;
-    private boolean isLoading = false;
+    private boolean isLoading = false;//正在加载？
+    private boolean isLoadMoreEnable = true;//没有更多数据的标识
     private int lastVisibleItemPosition;
     private int totalItemCount;
 
@@ -42,8 +41,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
     private View mLoadFailedView; //分页加载失败view
     private View mLoadEndView; //分页加载结束view
     private RelativeLayout mFooterLayout;//footer view
-    ArrayList<String> mDatas = new ArrayList<>();//真实的数据
-    private boolean isLoadMoreEnable = true;//没有更多数据的标识
+    private ArrayList<String> mDatas = new ArrayList<>();//真实的数据
     private ItemClickListener mOnItemClickListener;
     private int firstVisibleItemPosition;
     private boolean isAutoLoadMore = false;//自动加载更多
@@ -257,8 +255,11 @@ public class PTRAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void setLoaded() {
-        isLoading = false;
+    /**
+     * @param loadingState true:正在加载
+     */
+    public void setLoadingState(boolean loadingState) {
+        isLoading = loadingState;
     }
 
     public void setLoadMoreEnable(boolean b) {
@@ -304,13 +305,13 @@ public class PTRAdapter extends RecyclerView.Adapter {
     /**
      * @param loadEndView 当没有更多数据时，展示给用户的UI
      */
-    public void setLoadEndView(View loadEndView) {
+    public void setLoadNoMoreView(View loadEndView) {
         mLoadEndView = loadEndView;
         addFooterView(mLoadEndView);
     }
 
-    public void setLoadEndView(int loadEndId) {
-        setLoadEndView(ViewInflaterUtil.inflate(mContext, loadEndId));
+    public void setLoadNoMoreView(int loadEndId) {
+        setLoadNoMoreView(ViewInflaterUtil.inflate(mContext, loadEndId));
     }
 
     /**
@@ -329,7 +330,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
                 addFooterView(mLoadingView);
                 if (mLoadMoreListener != null) {
                     mLoadMoreListener.onLoadMore();
-                    isLoading = true;
+                    setLoadingState(true);
                 }
             }
         });
@@ -375,5 +376,21 @@ public class PTRAdapter extends RecyclerView.Adapter {
      */
     public void setmActivity(AppCompatActivity activity) {
         mActivity = activity;
+    }
+
+    /**
+     * 回滚Adapter到初始状态
+     */
+    public void setInitState() {
+        setLoadMoreEnable(true);
+        setLoadingView(R.layout.view_loadmore);
+    }
+
+    /**
+     * 设置没有更多数据了
+     */
+    public void setNoMoreDataState() {
+        setLoadMoreEnable(false);
+        setLoadNoMoreView(R.layout.view_nomoredata);
     }
 }

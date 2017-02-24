@@ -76,19 +76,20 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
         }
 
         if (isFirstRefersh) {
-            ptrRl.setTopMargin((int) getResources().getDimension(R.dimen.ptr_pb_height), true);
+            ptrRl.setRefreshState(true);
         }
 
-        //把footerView和currentPage设置为初始状态。
+        /**
+         * 回滚到初始状态
+         */
         currentPage = 1;
-        mptrAdapter.setLoadMoreEnable(true);
-        mptrAdapter.setLoadingView(R.layout.view_loadmore);
+        mptrAdapter.setInitState();
 
         getDataFromNet(1, new DataCallback<ArrayList<String>>() {
             @Override
             public void onSuccess(ArrayList<String> newdatas) {
 
-                ptrRl.setTopMargin(0, false);//完成刷新
+                ptrRl.setRefreshState(false);//完成刷新
 
                 isRefresh = false;//完成刷新
 
@@ -104,8 +105,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
                 }
 
                 if (newdatas.size() == TOTAL_COUNT) {
-                    mptrAdapter.setLoadMoreEnable(false);
-                    mptrAdapter.setLoadEndView(R.layout.view_nomoredata);
+                    mptrAdapter.setNoMoreDataState();
                 }
 
                 mptrAdapter.setNewDatas(newdatas);
@@ -115,7 +115,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
             public void onFail(String msg) {
                 //在已经有数据的情况下，刷新数据，突然断网，需要先清空数据
                 mptrAdapter.clearData();
-                ptrRl.setTopMargin(0, false);//完成刷新
+                ptrRl.setRefreshState(false);//完成刷新
                 isRefresh = false;//完成刷新
 
                 SingleToast.singleToast(PTRActivity.this, msg);
@@ -171,18 +171,17 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
 
                 //最最关键的是显示没有更多数据的时机，这里已获取数据和总数据的比较来把握没有数据的时机！
                 if ((newdatas.size()) == TOTAL_COUNT) {
-                    mptrAdapter.setLoadEndView(R.layout.view_nomoredata);
-                    mptrAdapter.setLoadMoreEnable(false);
+                    mptrAdapter.setNoMoreDataState();
                 }
 
                 mptrAdapter.setNewDatas(newdatas);
-                mptrAdapter.setLoaded();//加载完成
+                mptrAdapter.setLoadingState(false);//加载完成
 
             }
 
             @Override
             public void onFail(String msg) {
-                mptrAdapter.setLoaded();//加载完成
+                mptrAdapter.setLoadingState(false);//加载完成
                 mptrAdapter.setLoadFailedView(R.layout.view_failed_network, false);
             }
         }, false);
