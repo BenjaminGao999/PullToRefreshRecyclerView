@@ -1,6 +1,7 @@
 package com.adnonstop.ptrrecyclerviewbeta2.adapter;
 
 import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
+import com.adnonstop.ptrrecyclerviewbeta2.activity.PTRActivity;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.ItemClickListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.LoadMoreListener;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
@@ -29,7 +31,7 @@ import java.util.ArrayList;
 public class PTRAdapter extends RecyclerView.Adapter {
     private static final String TAG = "PTRAdapter";
     private final RecyclerView mRecyclerView;
-    private final Context mContext;
+    private final AppCompatActivity mContext;
     private final PTRRelativeLayout mptrRelativeLayout;
     private LoadMoreListener mLoadMoreListener;
     private boolean isLoading = false;
@@ -53,8 +55,9 @@ public class PTRAdapter extends RecyclerView.Adapter {
     private RelativeLayout.LayoutParams mRVLayoutParams;
     private final int VIEW_FOOTER = 101;//itemType  =  footerView
     private final int VIEW_ITEM = 102;//itemType = itemView
+    private AppCompatActivity mActivity;//该适配器绑定的Activity
 
-    public PTRAdapter(Context context, ArrayList<String> datas, RecyclerView recyclerView, PTRRelativeLayout ptrRelativeLayout) {
+    public PTRAdapter(AppCompatActivity context, ArrayList<String> datas, RecyclerView recyclerView, PTRRelativeLayout ptrRelativeLayout) {
         mContext = context;
         if (datas == null || recyclerView == null) {
             throw new RuntimeException("构造参数不能为null");
@@ -62,7 +65,16 @@ public class PTRAdapter extends RecyclerView.Adapter {
         mptrRelativeLayout = ptrRelativeLayout;
         mDatas = datas;
         mRecyclerView = recyclerView;
+        ptrRlbindActivity();
         handlePTR();
+    }
+
+    /**
+     * 为PTRRelativeLayout绑定Activity
+     */
+    private void ptrRlbindActivity() {
+        L.i(TAG, "ptrRlbindActivity()");
+        mptrRelativeLayout.setActivity(mContext);
     }
 
 
@@ -356,5 +368,12 @@ public class PTRAdapter extends RecyclerView.Adapter {
     public void setNetOffView(PTRRelativeLayout ptrRl, View netOffView) {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         ptrRl.addView(netOffView, layoutParams);
+    }
+
+    /**
+     * @param activity 该适配器绑定的Activity
+     */
+    public void setmActivity(AppCompatActivity activity) {
+        mActivity = activity;
     }
 }

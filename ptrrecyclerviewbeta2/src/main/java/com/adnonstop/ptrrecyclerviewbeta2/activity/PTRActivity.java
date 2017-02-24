@@ -9,9 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
@@ -60,7 +58,6 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
     private void initView() {
         mRecyclerview = (RecyclerView) findViewById(R.id.id_rv);
         ptrRl = (PTRRelativeLayout) findViewById(R.id.id_ptrrl);
-        ptrRl.setActivity(PTRActivity.this);
     }
 
     /**
@@ -91,7 +88,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
             @Override
             public void onSuccess(ArrayList<String> newdatas) {
 
-                ptrRl.setTopMargin(0,false);//完成刷新
+                ptrRl.setTopMargin(0, false);//完成刷新
 
                 isRefresh = false;//完成刷新
 
@@ -118,7 +115,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
             public void onFail(String msg) {
                 //在已经有数据的情况下，刷新数据，突然断网，需要先清空数据
                 mptrAdapter.clearData();
-                ptrRl.setTopMargin(0,false);//完成刷新
+                ptrRl.setTopMargin(0, false);//完成刷新
                 isRefresh = false;//完成刷新
 
                 SingleToast.singleToast(PTRActivity.this, msg);
