@@ -14,9 +14,10 @@ import android.widget.Button;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
 import com.adnonstop.ptrrecyclerviewbeta2.adapter.PTRAdapter;
-import com.adnonstop.ptrrecyclerviewbeta2.callback.DataCallback;
+import com.adnonstop.ptrrecyclerviewbeta2.callback.DataListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.ItemClickListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.LoadMoreListener;
+import com.adnonstop.ptrrecyclerviewbeta2.callback.RefreshDataListener;
 import com.adnonstop.ptrrecyclerviewbeta2.decoration.EmptyItemDecoration;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
 import com.adnonstop.ptrrecyclerviewbeta2.util.SingleToast;
@@ -85,7 +86,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
         currentPage = 1;
         mptrAdapter.setInitState();
 
-        getDataFromNet(1, new DataCallback<ArrayList<String>>() {
+        getDataFromNet(1, new DataListener<ArrayList<String>>() {
             @Override
             public void onSuccess(ArrayList<String> newdatas) {
 
@@ -141,7 +142,13 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
 
         //footerView添加loadMoreView
         mptrAdapter.setLoadingView(R.layout.view_loadmore);
+        initListener();
+    }
 
+    /**
+     * 单独把监听提取
+     */
+    private void initListener() {
         //设置加载更多的监听
         mptrAdapter.setLoadMoreListener(new LoadMoreListener() {
             @Override
@@ -157,6 +164,15 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
                 SingleToast.singleToast(PTRActivity.this, "position = " + position);
             }
         });
+
+        //设置刷新数据的监听
+        mptrAdapter.setRefreshDataListener(new RefreshDataListener() {
+            @Override
+            public void refreshData() {
+                initData(false);
+            }
+        });
+
     }
 
     /**
@@ -164,7 +180,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
      */
     private void loadMore() {
 
-        getDataFromNet(++currentPage, new DataCallback<ArrayList<String>>() {
+        getDataFromNet(++currentPage, new DataListener<ArrayList<String>>() {
             @Override
             public void onSuccess(ArrayList<String> newdatas) {
 
@@ -210,7 +226,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
      * @param callback
      * @desc 模拟联网加载数据
      */
-    private void getDataFromNet(int pageNum, final DataCallback<ArrayList<String>> callback, boolean isFromRefresh) {
+    private void getDataFromNet(int pageNum, final DataListener<ArrayList<String>> callback, boolean isFromRefresh) {
         if (isFromRefresh) {
             isRefresh = true;//标记正在刷新数据
         }

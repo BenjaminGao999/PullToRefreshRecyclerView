@@ -13,6 +13,7 @@ import android.widget.RelativeLayout;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
 import com.adnonstop.ptrrecyclerviewbeta2.activity.PTRActivity;
+import com.adnonstop.ptrrecyclerviewbeta2.adapter.PTRAdapter;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
 
 /**
@@ -28,7 +29,6 @@ public class PTRRelativeLayout extends RelativeLayout {
     private float disY;
     private LinearLayoutManager mLLManager;
     private LayoutParams mRVLayoutParams;
-    private AppCompatActivity mActivity;
     private FrameLayout mflpb;
     private LayoutParams mflpbLayoutParams;
     private ValueAnimator mAnimation;
@@ -37,6 +37,7 @@ public class PTRRelativeLayout extends RelativeLayout {
     private int mNewTopMargin;
     private int mPreTopMargin;
     private int mTotalTopMargin;//top margin 的叠加
+    private RecyclerView.Adapter mAdapter;//绑定Adapter
 
     public PTRRelativeLayout(Context context) {
         super(context);
@@ -236,14 +237,12 @@ public class PTRRelativeLayout extends RelativeLayout {
      * 联网获取数据
      */
     public void getDataFromNet() {
-        if (mActivity != null) {
-            if (mActivity instanceof PTRActivity) {
-                PTRActivity mActivity = (PTRActivity) this.mActivity;
-                mActivity.initData(false);
+        if (mAdapter != null) {
+            if (mAdapter instanceof PTRAdapter) {
+                PTRAdapter ptrAdapter = (PTRAdapter) mAdapter;
+                ptrAdapter.refreshData();
+                L.i(TAG, "刷新数据的操作走了Adapter");
             }
-            /**
-             * 根据需要可以添加更多的if
-             */
         }
     }
 
@@ -257,9 +256,6 @@ public class PTRRelativeLayout extends RelativeLayout {
         downRawY = moveRawY;
     }
 
-    public void setActivity(AppCompatActivity activity) {
-        mActivity = activity;
-    }
 
     /**
      * @return ptrRelativeLayout touch down rawY
@@ -277,5 +273,9 @@ public class PTRRelativeLayout extends RelativeLayout {
         } else {
             setTopMargin(0, false);
         }
+    }
+
+    public void setAdapter(RecyclerView.Adapter adapter) {
+        mAdapter = adapter;
     }
 }

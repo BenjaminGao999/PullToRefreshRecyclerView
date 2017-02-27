@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import com.adnonstop.ptrrecyclerviewbeta2.R;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.ItemClickListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.LoadMoreListener;
+import com.adnonstop.ptrrecyclerviewbeta2.callback.RefreshDataListener;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
 import com.adnonstop.ptrrecyclerviewbeta2.util.ViewInflaterUtil;
 import com.adnonstop.ptrrecyclerviewbeta2.view.PTRRelativeLayout;
@@ -29,7 +30,7 @@ import java.util.ArrayList;
 public class PTRAdapter extends RecyclerView.Adapter {
     private static final String TAG = "PTRAdapter";
     private final RecyclerView mRecyclerView;
-    private final AppCompatActivity mContext;
+    private AppCompatActivity mActivity;//该适配器绑定的Activity
     private final PTRRelativeLayout mptrRelativeLayout;
     private LoadMoreListener mLoadMoreListener;
     private boolean isLoading = false;//正在加载？
@@ -53,26 +54,27 @@ public class PTRAdapter extends RecyclerView.Adapter {
     private RelativeLayout.LayoutParams mRVLayoutParams;
     private final int VIEW_FOOTER = 101;//itemType  =  footerView
     private final int VIEW_ITEM = 102;//itemType = itemView
-    private AppCompatActivity mActivity;//该适配器绑定的Activity
+    private RefreshDataListener mRefreshDataListener;
 
-    public PTRAdapter(AppCompatActivity context, ArrayList<String> datas, RecyclerView recyclerView, PTRRelativeLayout ptrRelativeLayout) {
-        mContext = context;
+
+    public PTRAdapter(AppCompatActivity activity, ArrayList<String> datas, RecyclerView recyclerView, PTRRelativeLayout ptrRelativeLayout) {
+        mActivity = activity;
         if (datas == null || recyclerView == null) {
             throw new RuntimeException("构造参数不能为null");
         }
         mptrRelativeLayout = ptrRelativeLayout;
         mDatas = datas;
         mRecyclerView = recyclerView;
-        ptrRlbindActivity();
+        ptrRlbindAdapter();
         handlePTR();
     }
 
     /**
      * 为PTRRelativeLayout绑定Activity
      */
-    private void ptrRlbindActivity() {
-        L.i(TAG, "ptrRlbindActivity()");
-        mptrRelativeLayout.setActivity(mContext);
+    private void ptrRlbindAdapter() {
+        L.i(TAG, "ptrRlbindAdapter()");
+        mptrRelativeLayout.setAdapter(this);
     }
 
 
@@ -81,12 +83,12 @@ public class PTRAdapter extends RecyclerView.Adapter {
         if (viewType == VIEW_FOOTER) {
 
             if (mFooterLayout == null) {
-                mFooterLayout = new RelativeLayout(mContext);
+                mFooterLayout = new RelativeLayout(mActivity);
             }
             return CommonViewHolder.create(mFooterLayout);
 
         } else {
-            View itemView = LayoutInflater.from(mContext).inflate(R.layout.item_layout, parent, false);
+            View itemView = LayoutInflater.from(mActivity).inflate(R.layout.item_layout, parent, false);
             return CommonViewHolder.create(itemView);
         }
     }
@@ -218,7 +220,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
                         if (mLLManager == null) {
                             mLLManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
                         }
-                        if (mLLManager.findFirstVisibleItemPosition() == 0 && mNewState == RecyclerView.SCROLL_STATE_DRAGGING && disY > mContext.getResources().getDimension(R.dimen.threshold_show_enable)) {
+                        if (mLLManager.findFirstVisibleItemPosition() == 0 && mNewState == RecyclerView.SCROLL_STATE_DRAGGING && disY > mActivity.getResources().getDimension(R.dimen.threshold_show_enable)) {
                             L.i(TAG, "onClick: start show progressbar");
                             setTopMargin(1);
                             mptrRelativeLayout.setInitDownRawY(moveRawY);
@@ -282,11 +284,11 @@ public class PTRAdapter extends RecyclerView.Adapter {
         }
 
         if (mFooterLayout == null) {
-            mFooterLayout = new RelativeLayout(mContext);
+            mFooterLayout = new RelativeLayout(mActivity);
         }
         removeFooterView();
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                (int) mContext.getResources().getDimension(R.dimen.footerview));
+                (int) mActivity.getResources().getDimension(R.dimen.footerview));
         mFooterLayout.addView(footerView, params);
     }
 
@@ -299,7 +301,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
     }
 
     public void setLoadingView(int loadingId) {
-        setLoadingView(ViewInflaterUtil.inflate(mContext, loadingId));
+        setLoadingView(ViewInflaterUtil.inflate(mActivity, loadingId));
     }
 
     /**
@@ -311,7 +313,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
     }
 
     public void setLoadNoMoreView(int loadEndId) {
-        setLoadNoMoreView(ViewInflaterUtil.inflate(mContext, loadEndId));
+        setLoadNoMoreView(ViewInflaterUtil.inflate(mActivity, loadEndId));
     }
 
     /**
@@ -337,7 +339,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
     }
 
     public void setLoadFailedView(int loadFailedId, boolean isReloadEnable) {
-        setLoadFailedView(ViewInflaterUtil.inflate(mContext, loadFailedId), isReloadEnable);
+        setLoadFailedView(ViewInflaterUtil.inflate(mActivity, loadFailedId), isReloadEnable);
     }
 
     public void clearData() {
@@ -374,7 +376,7 @@ public class PTRAdapter extends RecyclerView.Adapter {
     /**
      * @param activity 该适配器绑定的Activity
      */
-    public void setmActivity(AppCompatActivity activity) {
+    public void setActivity(AppCompatActivity activity) {
         mActivity = activity;
     }
 
@@ -393,4 +395,22 @@ public class PTRAdapter extends RecyclerView.Adapter {
         setLoadMoreEnable(false);
         setLoadNoMoreView(R.layout.view_nomoredata);
     }
+
+    /**
+     * 刷新数据监听
+     *
+     * @param refreshDataListener
+     */
+    public void setRefreshDataListener(RefreshDataListener refreshDataListener) {
+        mRefreshDataListener = refreshDataListener;
+    }
+
+    /**
+     * 用来给PTRRelativeLayout调用刷新数据的
+     */
+    public void refreshData() {
+        if (mRefreshDataListener != null)
+            mRefreshDataListener.refreshData();
+    }
+
 }

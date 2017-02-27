@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * DATE :  2017/2/20 11:17
  */
 
-public interface DataCallback<T> {
+public interface DataListener<T> {
     void onSuccess(T newdatas);
 
     void onFail(String msg);
