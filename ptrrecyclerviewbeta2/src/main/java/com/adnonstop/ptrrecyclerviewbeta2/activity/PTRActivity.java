@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 /**
  * @author gzq
+ *         把该Activity提一抽象的
  */
 public class PTRActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -38,7 +39,6 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
     private static int TOTAL_COUNT = 30;
     private View netOffView;//断网显示的view
     private View emptyView;
-    private float mDownRawY;
     private PTRAdapter mptrAdapter;
     Handler mHandler = new Handler(Looper.getMainLooper());
     private ArrayList<String> newDatas;
