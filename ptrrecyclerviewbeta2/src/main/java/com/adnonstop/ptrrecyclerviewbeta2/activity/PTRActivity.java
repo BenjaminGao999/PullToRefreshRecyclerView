@@ -44,6 +44,9 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
     private ArrayList<String> newDatas;
     private PTRRelativeLayout ptrRl;
     private boolean isRefresh = false;//正在刷新？
+    private long mStartRefreshTime;//开始刷新
+    private long mEndTime;
+    private long mWaitTime = 1000L;//规定延时
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,11 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
         }
 
         /**
+         * 为了更好的用户体验，刷新回弹的时机一定要满足规定的时长
+         */
+        mStartRefreshTime = System.currentTimeMillis();
+
+        /**
          * 回滚到初始状态
          */
         currentPage = 1;
@@ -88,8 +96,40 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
 
         getDataFromNet(1, new DataListener<ArrayList<String>>() {
             @Override
-            public void onSuccess(ArrayList<String> newdatas) {
+            public void onSuccess(final ArrayList<String> newdatas) {
+                doAll(newdatas, true, "");
+            }
 
+            @Override
+            public void onFail(String msg) {
+                doAll(null, false, msg);
+            }
+
+            private void doAll(final ArrayList<String> newdatas, final boolean fromSuccess, final String msg) {
+                mEndTime = System.currentTimeMillis();
+                long mDt = mEndTime - mStartRefreshTime;
+                if (mWaitTime > mDt && !isFirstRefersh) {
+                    long delayMillis = mWaitTime - mDt;
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            dofinal(newdatas, fromSuccess, msg);
+                        }
+                    }, delayMillis);
+                } else {
+                    dofinal(newdatas, fromSuccess, msg);
+                }
+            }
+
+            private void dofinal(ArrayList<String> newdatas, boolean fromSuccess, String msg) {
+                if (fromSuccess) {
+                    doSuccess(newdatas);
+                } else {
+                    doFail(msg);
+                }
+            }
+
+            private void doSuccess(ArrayList<String> newdatas) {
                 ptrRl.setRefreshState(false);//完成刷新
 
                 isRefresh = false;//完成刷新
@@ -112,8 +152,7 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
                 mptrAdapter.setNewDatas(newdatas);
             }
 
-            @Override
-            public void onFail(String msg) {
+            private void doFail(String msg) {
                 //在已经有数据的情况下，刷新数据，突然断网，需要先清空数据
                 mptrAdapter.clearData();
                 ptrRl.setRefreshState(false);//完成刷新
@@ -252,23 +291,6 @@ public class PTRActivity extends AppCompatActivity implements View.OnClickListen
 //                callback.onSuccess(newDatas);
             }
         }, 1000);
-    }
-
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mDownRawY = ev.getRawY();
-                L.i(TAG, "mDownRawY = " + mDownRawY);
-                if (mptrAdapter != null) {
-                    mptrAdapter.setDowmRawY(mDownRawY);
-                }
-                break;
-            default:
-                break;
-        }
-        return super.dispatchTouchEvent(ev);
     }
 
 }

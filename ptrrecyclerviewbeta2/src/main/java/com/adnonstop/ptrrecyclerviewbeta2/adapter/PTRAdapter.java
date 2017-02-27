@@ -8,14 +8,18 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.adnonstop.ptrrecyclerviewbeta2.R;
+import com.adnonstop.ptrrecyclerviewbeta2.activity.PTRActivity;
+import com.adnonstop.ptrrecyclerviewbeta2.callback.DataListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.ItemClickListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.LoadMoreListener;
 import com.adnonstop.ptrrecyclerviewbeta2.callback.RefreshDataListener;
 import com.adnonstop.ptrrecyclerviewbeta2.util.L;
+import com.adnonstop.ptrrecyclerviewbeta2.util.SingleToast;
 import com.adnonstop.ptrrecyclerviewbeta2.util.ViewInflaterUtil;
 import com.adnonstop.ptrrecyclerviewbeta2.view.PTRRelativeLayout;
 import com.adnonstop.ptrrecyclerviewbeta2.viewholder.CommonViewHolder;
@@ -412,5 +416,6 @@ public class PTRAdapter extends RecyclerView.Adapter {
         if (mRefreshDataListener != null)
             mRefreshDataListener.refreshData();
     }
+
 
 }
