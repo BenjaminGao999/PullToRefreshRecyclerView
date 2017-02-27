@@ -201,7 +201,7 @@ public class PTRRelativeLayout extends RelativeLayout {
 
             mDamping = 1.0f;
 
-            if (topMargin > getResources().getDisplayMetrics().heightPixels / 4) {
+            if (topMargin > getResources().getDimension(R.dimen.ptr_pb_height)) {
                 mDamping = 2.0f;
             }
 
